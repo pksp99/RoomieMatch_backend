@@ -1,0 +1,420 @@
+openapi: 3.0.3
+info:
+  title: Roommate Finder API
+  description: |-
+    API for managing user information for a Roommate Finder application
+  version: 1.0.1
+servers:
+  - url: https://roomieMatch.edu/api/v1
+tags:
+  - name: Users
+    description: Everything about your Users
+  - name: Health Check
+    description: Health Check
+
+paths:
+  /users:
+    get:
+      security:
+        - APIKeyAuth: [ ]
+      parameters:
+        - in: header
+          name: x-userId
+          description: User ID of the authenticated user
+          schema:
+            type: string
+            example: USXXXXXXXXXXXXXXXXX
+          required: true
+        - in: query
+          name: recommendedUsers
+          schema:
+            type: boolean
+
+
+      tags:
+        - Users
+      operationId: getUserGroupsList
+      summary: Get list of users
+      description: Returns a list of all users with some key highlighted information.
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetUserGroupsResponse"
+
+    post:
+      security:
+        - APIKeyAuth: [ ]
+      parameters:
+        - in: header
+          name: x-userId
+          description: User ID of the authenticated user
+          schema:
+            type: string
+            example: USXXXXXXXXXXXXXXXXX
+          required: true
+      tags:
+        - Users
+      operationId: createUser
+      summary: Create new user
+      description: Creates a new user with the provided data.
+      requestBody:
+        description: User object to be created
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserCreatedResponse"
+
+        400:
+          description: Bad Request
+        500:
+          description: Internal Server Error
+
+  /users/{userId}:
+
+    parameters:
+      - name: userId
+        in: path
+        description: ID of the user
+        required: true
+        schema:
+          type: string
+          example: USXXXXXXXXXXXXXXXXX
+    get:
+      security:
+        - APIKeyAuth: [ ]
+      parameters:
+        - in: header
+          name: x-userId
+          description: User ID of the authenticated user
+          schema:
+            type: string
+            example: USXXXXXXXXXXXXXXXXX
+          required: true
+      tags:
+        - Users
+      operationId: getUserDetail
+      summary: Get user detail
+      description: Returns the detailed information for a user with the specified ID.
+      responses:
+        200:
+          description: User detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        400:
+          description: Bad Request
+        500:
+          description: Internal Server Error
+    patch:
+      security:
+        - APIKeyAuth: [ ]
+      parameters:
+        - in: header
+          name: x-userId
+          description: User ID of the authenticated user
+          schema:
+            type: string
+            example: USXXXXXXXXXXXXXXXXX
+          required: true
+      tags:
+        - Users
+      operationId: updateUser
+      summary: Update user
+      description: Updates an existing user with the provided data.
+      requestBody:
+        description: User object to be updated
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserAttributes"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        400:
+          description: Bad Request
+        500:
+          description: Internal Server Error
+
+  /like/{groupId}:
+    parameters:
+      - name: groupId
+        in: path
+        description: group ID of the user that is liked.
+        required: true
+        schema:
+          type: string
+          example: GRXXXXXXXXXXXXXXXXX
+    post:
+      security:
+        - APIKeyAuth: [ ]
+
+      operationId: likeGroup
+      parameters:
+        - in: header
+          name: x-userId
+          description: User ID of the authenticated user
+          schema:
+            type: string
+            example: USXXXXXXXXXXXXXXXXX
+          required: true
+      tags:
+        - LikeDislike
+      responses:
+        201:
+          description: done
+
+  /disLike/{groupId}:
+    parameters:
+      - name: groupId
+        in: path
+        description: group ID of the user that is liked.
+        required: true
+        schema:
+          type: string
+          example: GRXXXXXXXXXXXXXXXXX
+    post:
+      security:
+        - APIKeyAuth: [ ]
+      operationId: dislikeGroup
+      parameters:
+        - in: header
+          name: x-userId
+          description: User ID of the authenticated user
+          schema:
+            type: string
+            example: USXXXXXXXXXXXXXXXXX
+          required: true
+      tags:
+        - LikeDislike
+      responses:
+        201:
+          description: done
+
+  /healthcheck:
+    get:
+      tags:
+        - Health Check
+      summary: Healthcheck endpoint
+      description: Returns the status of the API.
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthcheckResponse"
+components:
+  schemas:
+    HealthcheckResponse:
+      type: object
+      properties:
+        healthcheck:
+          type: string
+          enum: [ success, fail ]
+    GetUserGroupsResponse:
+      type: object
+      properties:
+        userGroups:
+          type: array
+          items:
+            allOf:
+              - $ref: "#/components/schemas/Group"
+              - type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/User"
+
+    Group:
+      type: object
+      properties:
+        id:
+          type: string
+          example: GRXXXXXXXXXXXXXXXXXXX
+          description: Unique group ID.
+        group_info:
+          type: string
+        user_count:
+          type: integer
+          minimum: 1
+          maximum: 8
+          example: 1
+        user_ids:
+          type: array
+          items:
+            type: string
+            example: USXXXXXXXXXXXXXXXXXXX
+
+    UserCreatedResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the user upon creation.
+          example: USXXXXXXXXXXXXXXXXXXX
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: USXXXXXXXXXXXXXXXXXXX
+        email:
+          type: string
+          format: email
+        groupId:
+          type: string
+          
+          description: If user has joined any group, it will represent it's group id.
+          example: GRXXXXXXXXXXXXXXXXXXX
+        user_attributes:
+          $ref: "#/components/schemas/UserAttributes"
+        preferred_attributes:
+          $ref: "#/components/schemas/PreferredAttributes"
+
+
+
+
+    UserAttributes:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the User
+          example: John Snow
+
+        intro:
+          type: string
+          description: A single line of intro for the user.
+          example: You will be lucky to have me as a roommate.
+
+        profile_image:
+          type: string
+          description: Link for user's profile Image.
+          format: url
+          example: https://roomiematch/images/usfdflffso.jpg
+
+        gender:
+          type: string
+          enum: [ male, female, other]
+          description: User's gender
+        age:
+          type: integer
+          minimum: 18
+          maximum: 100
+          description: User's age
+
+        monthly_budget:
+          type: integer
+          minimum: 300
+          maximum: 2000
+          description: Monthly budget of the user.
+
+        major:
+          type: string
+          description: User's major or field of study
+          enum: [ "Business Administration",  "Computer Science",  "Psychology",  "Nursing",  "Education",  "Biology",  "Engineering",  "Communications",  "Political Science",  "English Literature",  "Mathematics",  "History",  "Economics",  "Sociology",  "Art and Design",  "Environmental Science/Studies",  "Marketing",  "Physics",  "Chemistry",  "Foreign Languages and Literatures" ]
+        date_available:
+          type: string
+          format: date
+          description: Date of availability
+        food_preference:
+          type: string
+          description: User's food preference
+          enum: [ Vegetarian, Vegan, Jain, Gluten-Free, No Preference ]
+
+        cover_images:
+          type: array
+          description: Link for user's cover images.
+          items:
+            type: string
+            format: url
+            example: https://roomiematch/images/usfdflffso.jpg
+
+        bio:
+          type: string
+          description: User's bio or description
+
+        hobbies:
+          type: array
+          items:
+            type: string
+          description: User's hobbies or interests
+        cleanliness:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: User's cleanliness rating (1=very messy, 5=very clean)
+        sleep_schedule:
+          type: string
+          enum: [ early_bird, night_owl, somewhere_in_between ]
+          description: User's preferred sleep schedule
+        smoking:
+          type: boolean
+          description: Whether the user smokes or not
+        partying:
+          type: boolean
+          description: Whether the user likes to party or not
+        pet_friendly:
+          type: boolean
+          description: Whether the user is okay with living with pets or not
+
+    PreferredAttributes:
+      type: object
+      properties:
+        gender:
+          type: string
+          enum: [ male, female, other]
+          description: User's gender
+        hobbies:
+          type: array
+          items:
+            type: string
+          description: User's hobbies or interests
+        food_preference:
+          type: string
+          description: User's food preference
+          enum: [ Vegetarian, Vegan, Jain, Gluten-Free, No Preference ]
+        cleanliness:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: User's cleanliness rating (1=very messy, 5=very clean)
+        sleep_schedule:
+          type: string
+          enum: [ early_bird, night_owl, somewhere_in_between ]
+          description: User's preferred sleep schedule
+        smoking:
+          type: boolean
+          description: Whether the user smokes or not
+        partying:
+          type: boolean
+          description: Whether the user likes to party or not
+        pet_friendly:
+          type: boolean
+          description: Whether the user is okay with living with pets or not
+
+
+  securitySchemes:
+    APIKeyAuth:
+      type: apiKey
+      name: authorization
+      in: header
