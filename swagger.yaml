@@ -26,9 +26,10 @@ paths:
             example: USXXXXXXXXXXXXXXXXX
           required: true
         - in: query
-          name: recommendedUsers
+          name: isRecommendedUsers
           schema:
             type: boolean
+            default: true
 
 
       tags:

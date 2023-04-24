@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class GetUserGroupsListService {
-    public ResponseEntity<GetUserGroupsResponse> getUserGroupList(String xUserId) {
+    public ResponseEntity<GetUserGroupsResponse> getUserGroupList(String xUserId, Boolean isRecommendedUsers) {
         return null;
     }
 }

@@ -55,9 +55,10 @@ public class UsersController implements UsersApi {
     }
 
     @Override
-    public ResponseEntity<GetUserGroupsResponse> getUserGroupsList(String xUserId) {
-        return getUserGroupsListService.getUserGroupList(xUserId);
+    public ResponseEntity<GetUserGroupsResponse> getUserGroupsList(String xUserId, Boolean isRecommendedUsers) {
+        return getUserGroupsListService.getUserGroupList(xUserId, isRecommendedUsers);
     }
+
 
     @Override
     public ResponseEntity<User> updateUser(String xUserId, String userId, UserAttributes body) {
