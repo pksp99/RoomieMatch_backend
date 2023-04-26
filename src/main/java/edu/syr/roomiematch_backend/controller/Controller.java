@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.List;
+
 @RestController
 @RequestMapping("/api")
 @Slf4j
@@ -29,12 +32,15 @@ public class Controller {
     private ActionService actionService;
 
 
+    @GetMapping("/users")
+    public ResponseEntity<HashMap<String,Object>> getUserGroups(String xUserId, Boolean isRecommendedUsers) {
+        return getUserGroupsListService.getUserGroups(xUserId, isRecommendedUsers);
+    }
 
     @PostMapping("/users")
     public ResponseEntity<String> createUser(@RequestBody Group group ,@RequestParam String xUserId) throws Exception {
         return createUserService.createUser(group,xUserId);
     }
-
 
 
     @GetMapping("/users/{userId}")
@@ -53,10 +59,7 @@ public class Controller {
         return actionService.performDislikeAction(groupId, xUserId);
     }
 
-//    @Override
-//    public ResponseEntity<GetUserGroupsResponse> getUserGroupsList(String xUserId, Boolean isRecommendedUsers) {
-//        return getUserGroupsListService.getUserGroupList(xUserId, isRecommendedUsers);
-//    }
+
 //
 //
 //    @Override

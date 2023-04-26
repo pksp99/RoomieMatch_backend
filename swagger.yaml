@@ -275,7 +275,7 @@ components:
     User:
       type: object
       properties:
-        id:
+        userId:
           type: string
           example: USXXXXXXXXXXXXXXXXXXX
         email:
