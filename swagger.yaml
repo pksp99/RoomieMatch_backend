@@ -247,7 +247,7 @@ components:
     Group:
       type: object
       properties:
-        id:
+        groupId:
           type: string
           example: GRXXXXXXXXXXXXXXXXXXX
           description: Unique group ID.
@@ -275,9 +275,6 @@ components:
     User:
       type: object
       properties:
-        id:
-          type: string
-          example: yE5FwIcBv_1Gxmdt9NP9
         userId:
           type: string
           example: USXXXXXXXXXXXXXXXXXXX
@@ -286,7 +283,7 @@ components:
           format: email
         groupId:
           type: string
-          
+
           description: If user has joined any group, it will represent it's group id.
           example: GRXXXXXXXXXXXXXXXXXXX
         user_attributes:
@@ -349,9 +346,12 @@ components:
           type: array
           description: Link for user's cover images.
           items:
-            type: string
-            format: url
-            example: https://roomiematch/images/usfdflffso.jpg
+            type: object
+            properties:
+              image_url:
+                type: string
+                format: url
+                example: https://roomiematch/images/usfdflffso.jpg
 
         bio:
           type: string
