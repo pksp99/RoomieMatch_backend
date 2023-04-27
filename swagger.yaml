@@ -275,6 +275,9 @@ components:
     User:
       type: object
       properties:
+        id:
+          type: string
+          example: yE5FwIcBv_1Gxmdt9NP9
         userId:
           type: string
           example: USXXXXXXXXXXXXXXXXXXX

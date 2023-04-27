@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -33,13 +32,13 @@ public class Controller {
 
 
     @GetMapping("/users")
-    public ResponseEntity<HashMap<String,Object>> getUserGroups(String xUserId, Boolean isRecommendedUsers) {
+    public ResponseEntity<HashMap<String, Object>> getUserGroups(String xUserId, Boolean isRecommendedUsers) {
         return getUserGroupsListService.getUserGroups(xUserId, isRecommendedUsers);
     }
 
     @PostMapping("/users")
-    public ResponseEntity<String> createUser(@RequestBody Group group ,@RequestParam String xUserId) throws Exception {
-        return createUserService.createUser(group,xUserId);
+    public ResponseEntity<String> createUser(@RequestBody Group group, @RequestParam String xUserId) throws Exception {
+        return createUserService.createUser(group, xUserId);
     }
 
 
