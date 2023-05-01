@@ -231,21 +231,33 @@ components:
           enum: [ success, fail ]
     GetUserGroupsResponse:
       type: object
+      required:
+        - userGroups
       properties:
         userGroups:
           type: array
           items:
-            allOf:
-              - $ref: "#/components/schemas/Group"
-              - type: object
-                properties:
-                  users:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/User"
+            $ref: "#/components/schemas/UserGroup"
+
+    UserGroup:
+      type: object
+      required:
+        - users
+      allOf:
+        - $ref: "#/components/schemas/Group"
+        - type: object
+          properties:
+            users:
+              type: array
+              items:
+                $ref: "#/components/schemas/User"
 
     Group:
       type: object
+      required:
+        - groupId
+        - user_count
+        - user_ids
       properties:
         groupId:
           type: string
@@ -266,14 +278,21 @@ components:
 
     UserCreatedResponse:
       type: object
+      required:
+        - userId
       properties:
-        id:
+        userId:
           type: string
           description: ID of the user upon creation.
           example: USXXXXXXXXXXXXXXXXXXX
 
     User:
       type: object
+      required:
+        - userId
+        - email
+        - user_attributes
+        - groupId
       properties:
         userId:
           type: string
@@ -296,6 +315,17 @@ components:
 
     UserAttributes:
       type: object
+      required:
+        - name
+        - intro
+        - profile_image
+        - cover_images
+        - major
+        - gender
+        - monthly_budget
+        - cleanliness
+        - sleep_schedule
+        - date_available
       properties:
         name:
           type: string
@@ -340,6 +370,7 @@ components:
         food_preference:
           type: string
           description: User's food preference
+          default: No Preference
           enum: [ Vegetarian, Vegan, Jain, Gluten-Free, No Preference ]
 
         cover_images:
@@ -373,12 +404,15 @@ components:
           description: User's preferred sleep schedule
         smoking:
           type: boolean
+          default: false
           description: Whether the user smokes or not
         partying:
           type: boolean
+          default: false
           description: Whether the user likes to party or not
         pet_friendly:
           type: boolean
+          default: false
           description: Whether the user is okay with living with pets or not
 
     PreferredAttributes:
