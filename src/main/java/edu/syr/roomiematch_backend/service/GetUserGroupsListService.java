@@ -1,36 +1,49 @@
 package edu.syr.roomiematch_backend.service;
 
-import edu.syr.roomiematch_backend.dao.Group;
+import edu.syr.roomiematch_backend.dao.UserGroupIndex;
+import edu.syr.roomiematch_backend.dao.UserIndex;
 import edu.syr.roomiematch_backend.model.GetUserGroupsResponse;
-import edu.syr.roomiematch_backend.repository.GroupRepository;
+import edu.syr.roomiematch_backend.model.UserGroup;
+import edu.syr.roomiematch_backend.repository.UserGroupIndexRepository;
+import edu.syr.roomiematch_backend.repository.UserIndexRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 public class GetUserGroupsListService {
 
     @Autowired
-    GroupRepository groupRepository;
+    UserIndexRepository userIndexRepository;
 
-    public ResponseEntity<HashMap<String,Object>> getUserGroups(String xUserId, Boolean isRecommendedUsers) {
+    @Autowired
+    UserGroupIndexRepository userGroupIndexRepository;
 
-        //Currently not using isRecommendedUsers
-        Iterable<Group> userGroups = groupRepository.findAll();
+    public ResponseEntity<GetUserGroupsResponse> getUserGroups(String xUserId, Boolean isRecommendedUsers) {
 
-        //Convert iterable to List using Java8 stream.
-        List<Group> userGroupsList = StreamSupport.stream(userGroups.spliterator(), false)
-                .collect(Collectors.toList());
+        //Fetch All user groups
+        Iterable<UserGroupIndex> userGroupIndexIterable = userGroupIndexRepository.findAll();
+        List<UserGroup> userGroupList = new ArrayList<>();
 
-        HashMap<String,Object> userGroupsMap = new HashMap<>();
-        userGroupsMap.put("userGroups",userGroupsList);
 
-        return ResponseEntity.ok(userGroupsMap);
+        userGroupIndexIterable.forEach( userGroupIndex -> {
+            UserGroup userGroup = new UserGroup();
+            userGroup.setUsers(userGroupIndex.getUsers());
+            userGroup.setUserIds(userGroupIndex.getUser_ids());
+            userGroup.setGroupId(userGroupIndex.getGroupId());
+            userGroup.setGroupInfo(userGroupIndex.getGroup_info());
+            userGroup.setUserCount(userGroupIndex.getUser_count());
 
+            userGroupList.add(userGroup);
+        });
+
+        //Create response body
+        GetUserGroupsResponse userGroupsResponse = new GetUserGroupsResponse();
+        userGroupsResponse.setUserGroups(userGroupList);
+
+        return ResponseEntity.ok(userGroupsResponse);
     }
 }

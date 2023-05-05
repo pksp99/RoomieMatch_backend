@@ -1,8 +1,13 @@
 package edu.syr.roomiematch_backend.service;
 
 import edu.syr.roomiematch_backend.dao.LikedGroup;
+import edu.syr.roomiematch_backend.dao.UserGroupIndex;
 import edu.syr.roomiematch_backend.dao.UserGroupLink;
+import edu.syr.roomiematch_backend.model.GroupList;
+import edu.syr.roomiematch_backend.model.LikeResponse;
+import edu.syr.roomiematch_backend.model.LikeResponseGroup;
 import edu.syr.roomiematch_backend.repository.LikedGroupsRepository;
+import edu.syr.roomiematch_backend.repository.UserGroupIndexRepository;
 import edu.syr.roomiematch_backend.repository.UserGroupLinkRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.index.IndexRequest;
@@ -31,45 +36,86 @@ public class ActionService {
     @Autowired
     LikedGroupsRepository likedGroupsRepository;
 
-    public ResponseEntity<String> performLikeAction(String groupId, String xUserId) {
+
+    @Autowired
+    UserGroupIndexRepository userGroupIndexRepository;
+
+    public ResponseEntity<LikeResponse> performLikeAction(String groupId, String xUserId) {
+
+        LikeResponse likeResponse = new LikeResponse();
+        LikeResponseGroup likeResponseGroup = new LikeResponseGroup();
+
 
         UserGroupLink userGroupLink = userGroupLinkRepository.findByUserId(xUserId);
-
-        if (userGroupLink == null) {
-            return ResponseEntity.ok("User with Id : " + xUserId + " not found.");
-        }
-
-        //Make index request for new LikedGroup Document
-        IndexRequest request = new IndexRequest("likedgroups");
-        Map<String, Object> likedGroupsMap = new HashMap<>();
-
-        likedGroupsMap.put("groupIdMakingLikeAction", userGroupLink.getGroupId());
-        likedGroupsMap.put("groupIdLiked", groupId);
-
-
-        request.source(likedGroupsMap);
+        LikedGroup likedGroup = new LikedGroup();
+        likedGroup.setGroupIdLiked(groupId);
+        likedGroup.setGroupIdMakingLikeAction(userGroupLink.getGroupId());
 
         try {
-            restHighLevelClient.index(request, RequestOptions.DEFAULT);
-        } catch (IOException e) {
-            log.info("Exception caught: " + e);
+            likedGroupsRepository.save(likedGroup);
+        } catch (Exception e) {
         }
 
-        return ResponseEntity.ok("Done");
+
+        List<LikedGroup> likedGroupList = likedGroupsRepository.findByGroupIdMakingLikeAction(groupId);
+
+
+        //Check all likes of liked Group, if he/she has liked current user before
+        if (likedGroupList != null) {
+            for (LikedGroup likedGroup1 : likedGroupList) {
+                if (likedGroup1.getGroupIdLiked().equalsIgnoreCase(likedGroup.getGroupIdMakingLikeAction())) {
+                    likeResponse.setMutualLike(true);
+                    List<String> user_names = new ArrayList<>();
+                    List<String> user_ids = new ArrayList<>();
+
+                    likeResponseGroup.setGroupId(userGroupLink.getGroupId());
+
+                    //Get user details from both groups and add it in response body
+                    UserGroupIndex userGroupIndex = userGroupIndexRepository.findByGroupId(groupId);
+                    UserGroupIndex userGroupIndex2 = userGroupIndexRepository.findByGroupId(userGroupLink.getGroupId());
+
+                    user_ids.addAll(userGroupIndex.getUser_ids());
+                    user_ids.addAll(userGroupIndex2.getUser_ids());
+                    likeResponseGroup.setUserIds(user_ids);
+
+
+                    //Add user names from first group
+                    userGroupIndex.getUsers().forEach(User -> {
+                        user_names.add(User.getUserAttributes().getName());
+                    });
+
+                    //Add user names from second group
+
+                    userGroupIndex2.getUsers().forEach(User -> {
+                        user_names.add(User.getUserAttributes().getName());
+                    });
+
+                    likeResponseGroup.setUserNames(user_names);
+                    likeResponse.setGroup(likeResponseGroup);
+                    return ResponseEntity.ok(likeResponse);
+
+                }
+            }
+        }
+
+        // Both havent liked each other
+        likeResponse.setMutualLike(false);
+        likeResponse.setGroup(null);
+        return ResponseEntity.ok(likeResponse);
 
     }
 
     public ResponseEntity<String> performDislikeAction(String groupId, String xUserId) {
-       UserGroupLink userGroupLink =  userGroupLinkRepository.findByUserId(xUserId);
 
+        UserGroupLink userGroupLink = userGroupLinkRepository.findByUserId(xUserId);
 
-       if(userGroupLink == null){
-           return ResponseEntity.ok("Error when performing dislike!");
-       }
+        if (userGroupLink == null) {
+            return ResponseEntity.ok("Error when performing dislike!");
+        }
         Iterable<LikedGroup> documents = likedGroupsRepository.findAll();
         List<LikedGroup> likedGroupsList = new ArrayList<>();
         for (LikedGroup likedGroup : documents) {
-            if(likedGroup.getGroupIdLiked().equalsIgnoreCase(groupId) && likedGroup.getGroupIdMakingLikeAction().equalsIgnoreCase(userGroupLink.getGroupId())){
+            if (likedGroup.getGroupIdLiked().equalsIgnoreCase(groupId) && likedGroup.getGroupIdMakingLikeAction().equalsIgnoreCase(userGroupLink.getGroupId())) {
                 likedGroupsList.add(likedGroup);
             }
         }
@@ -77,4 +123,6 @@ public class ActionService {
         likedGroupsRepository.deleteAll(likedGroupsList);
         return ResponseEntity.ok("Done");
     }
+
+
 }

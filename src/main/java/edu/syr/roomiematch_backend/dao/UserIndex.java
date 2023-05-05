@@ -1,16 +1,16 @@
 package edu.syr.roomiematch_backend.dao;
 
-import edu.syr.roomiematch_backend.dao.nonIndexClasses.PreferredAttributes;
-import edu.syr.roomiematch_backend.dao.nonIndexClasses.UserAttributes;
+import edu.syr.roomiematch_backend.model.PreferredAttributes;
+import edu.syr.roomiematch_backend.model.UserAttributes;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-@Document(indexName = "groups")
+@Document(indexName = "users")
 @Data
-public class Group {
+public class UserIndex {
 
     @Id
     private String id;
@@ -25,10 +25,10 @@ public class Group {
     private String groupId;
 
     @Field(type = FieldType.Object)
-    private UserAttributes user_attributes;
+    private UserAttributes userAttributes;
 
     @Field(type = FieldType.Object)
-    private PreferredAttributes preferred_attributes;
+    private PreferredAttributes preferredAttributes;
 
 
 }

@@ -1,22 +1,22 @@
 package edu.syr.roomiematch_backend.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.syr.roomiematch_backend.dao.Group;
-import edu.syr.roomiematch_backend.dao.nonIndexClasses.PreferredAttributes;
-import edu.syr.roomiematch_backend.dao.nonIndexClasses.UserAttributes;
+import edu.syr.roomiematch_backend.dao.UserGroupIndex;
+import edu.syr.roomiematch_backend.dao.UserGroupLink;
+import edu.syr.roomiematch_backend.dao.UserIndex;
+import edu.syr.roomiematch_backend.model.*;
+import edu.syr.roomiematch_backend.repository.UserGroupIndexRepository;
+import edu.syr.roomiematch_backend.repository.UserGroupLinkRepository;
+import edu.syr.roomiematch_backend.repository.UserIndexRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
+import java.util.List;
 
 
 @Service
@@ -27,93 +27,123 @@ public class CreateUserService {
     RestHighLevelClient restHighLevelClient;
 
 
-    public ResponseEntity<String> createUser(Group group, String xUserId) {
+    @Autowired
+    UserIndexRepository userIndexRepository;
 
-        //Creating new objectmapper for converting Object to json string
-        ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    UserGroupIndexRepository userGroupIndexRepository;
 
-        UserAttributes userAttributes = group.getUser_attributes();
-
-        PreferredAttributes preferredAttributes = group.getPreferred_attributes();
-
-        //Make index request for new 'groups' Document
-        IndexRequest request = new IndexRequest("groups");
+    @Autowired
+    UserGroupLinkRepository userGroupLinkRepository;
 
 
-        request.source(
-                new HashMap<String, Object>() {{
-                    put("userId", group.getUserId());
-                    put("email", group.getEmail());
-                    put("groupId", group.getGroupId());
-                    put("user_attributes", new HashMap<String, Object>() {{
-                        put("name", userAttributes.getName());
-                        put("intro", userAttributes.getIntro());
-                        put("profile_image", userAttributes.getProfile_image());
-                        put("gender",userAttributes.getGender());
-                        put("age", userAttributes.getAge());
-                        put("monthly_budget", userAttributes.getMonthly_budget());
-                        put("major", userAttributes.getMajor());
-                        put("date_available", userAttributes.getDate_available());
-                        put("food_preference", userAttributes.getFood_preference());
-                        put("cover_images", new ArrayList<Map<String, Object>>() {{
-                            add(new HashMap<String, Object>() {{
-                                put("image_url", "https://example.com/image1.png");
-                            }});
-                            add(new HashMap<String, Object>() {{
-                                put("image_url", "https://example.com/image2.png");
-                            }});
-                        }});
-                        put("bio",userAttributes.getBio());
-                        put("hobbies", new ArrayList<String>() {{
-                            add("coding");
-                            add("music");
-                            add("movies");
-                        }});
-                        put("cleanliness", userAttributes.getCleanliness());
-                        put("sleep_schedule", userAttributes.getSleep_schedule());
-                        put("smoking", userAttributes.isPartying());
-                        put("partying", userAttributes.isPartying());
-                        put("pet_friendly", userAttributes.isPet_friendly());
-                    }});
-                    put("preferred_attributes", new HashMap<String, Object>() {{
-                        put("gender", preferredAttributes.getGender());
-                        put("hobbies", new ArrayList<String>() {{
-                            add("coding");
-                            add("music");
-                            add("movies");
-                        }});
-                        put("food_preference",preferredAttributes.getFood_preference());
-                        put("cleanliness", preferredAttributes.getCleanliness());
-                        put("sleep_schedule",preferredAttributes.getSleep_schedule());
-                        put("smoking",preferredAttributes.isSmoking());
-                        put("partying", preferredAttributes.isPartying());
-                        put("pet_friendly", preferredAttributes.isPet_friendly());
-                    }});
-                }}
-        );
+    public ResponseEntity<UserCreatedResponse> createUser(User body, String xUserId) {
 
+        // TBD : Logic to update in the same call
+        UserIndex existingUserIndex = userIndexRepository.findByUserId(body.getUserId());
+        UserIndex userIndex = new UserIndex();
+        UserCreatedResponse userCreatedResponse = new UserCreatedResponse();
+        UserGroupIndex userGroupIndex = new UserGroupIndex();
+
+        //If the user doesn't exist, create user
+        if(existingUserIndex==null) {
+
+            userIndex.setUserId(body.getUserId());
+            userIndex.setGroupId(body.getGroupId());
+            userIndex.setEmail(body.getEmail());
+            userIndex.setPreferredAttributes(body.getPreferredAttributes());
+            userIndex.setUserAttributes(body.getUserAttributes());
+
+            try {
+                userIndexRepository.save(userIndex);
+            } catch (Exception e) {
+            }
+
+
+            //Create a User-Group-Link for the user
+            UserGroupLink userGroupLink = new UserGroupLink();
+            userGroupLink.setUserId(body.getUserId());
+            userGroupLink.setGroupId(body.getGroupId());
+
+            try {
+                userGroupLinkRepository.save(userGroupLink);
+            } catch (Exception e) {
+            }
+
+
+
+            //Create a List containing this user
+            List<User> userList = new ArrayList<>();
+            userList.add(body);
+            userGroupIndex.setUsers(userList);
+
+            userGroupIndex.setUser_ids(Collections.singletonList(userIndex.getUserId()));
+            userGroupIndex.setGroupId(userIndex.getGroupId());
+            userGroupIndex.setUser_count(1);
+            userGroupIndex.setGroup_info("User group");
+
+            try {
+                userGroupIndexRepository.save(userGroupIndex);
+            } catch (Exception e) {
+            }
+
+
+            userCreatedResponse.setUserId(body.getUserId());
+
+            return new ResponseEntity<>(userCreatedResponse, HttpStatus.CREATED);
+
+        }
+
+        //Delete the document in User Index, User group Index
+        try {
+            userIndexRepository.delete(existingUserIndex);
+        }
+        catch(Exception e){}
+
+
+        //Find and delete the document in User Group Index. This is temporary code for demo
+        UserGroupIndex existingUserGroupIndex = userGroupIndexRepository.findByGroupId(body.getGroupId());
+
+        try{
+            userGroupIndexRepository.delete(existingUserGroupIndex);
+        }
+        catch (Exception e){}
+
+
+
+        userIndex.setUserId(body.getUserId());
+        userIndex.setGroupId(body.getGroupId());
+        userIndex.setEmail(body.getEmail());
+        userIndex.setPreferredAttributes(body.getPreferredAttributes());
+        userIndex.setUserAttributes(body.getUserAttributes());
 
         try {
-            restHighLevelClient.index(request, RequestOptions.DEFAULT);
-        } catch (IOException e) {
+            userIndexRepository.save(userIndex);
+        } catch (Exception e) {
         }
 
 
-        //Make index request for new 'usergrouplinks' Document
-        request = new IndexRequest("usergrouplinks");
 
-        Map<String, Object> userGroupLinksMap = new HashMap<>();
 
-        userGroupLinksMap.put("userId", group.getUserId());
-        userGroupLinksMap.put("groupId", group.getGroupId());
+        //Creating a User Group Index document
+        //Create a List containing this user
+        List<User> userList = new ArrayList<>();
+        userList.add(body);
+        userGroupIndex.setUsers(userList);
 
-        request.source(userGroupLinksMap);
+        userGroupIndex.setUser_ids(Collections.singletonList(userIndex.getUserId()));
+        userGroupIndex.setGroupId(userIndex.getGroupId());
+        userGroupIndex.setUser_count(1);
+        userGroupIndex.setGroup_info("User group");
 
         try {
-            restHighLevelClient.index(request, RequestOptions.DEFAULT);
-        } catch (IOException e) {
+            userGroupIndexRepository.save(userGroupIndex);
+        } catch (Exception e) {
         }
 
-        return ResponseEntity.ok(group.getUserId());
+
+        userCreatedResponse.setUserId(body.getUserId());
+        return new ResponseEntity<>(userCreatedResponse, HttpStatus.CREATED);
+
     }
 }
