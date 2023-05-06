@@ -30,14 +30,17 @@ public class GetUserGroupsListService {
 
 
         userGroupIndexIterable.forEach( userGroupIndex -> {
-            UserGroup userGroup = new UserGroup();
-            userGroup.setUsers(userGroupIndex.getUsers());
-            userGroup.setUserIds(userGroupIndex.getUser_ids());
-            userGroup.setGroupId(userGroupIndex.getGroupId());
-            userGroup.setGroupInfo(userGroupIndex.getGroup_info());
-            userGroup.setUserCount(userGroupIndex.getUser_count());
 
-            userGroupList.add(userGroup);
+            if(!userGroupIndex.getUser_ids().get(0).equalsIgnoreCase(xUserId)) {
+                UserGroup userGroup = new UserGroup();
+                userGroup.setUsers(userGroupIndex.getUsers());
+                userGroup.setUserIds(userGroupIndex.getUser_ids());
+                userGroup.setGroupId(userGroupIndex.getGroupId());
+                userGroup.setGroupInfo(userGroupIndex.getGroup_info());
+                userGroup.setUserCount(userGroupIndex.getUser_count());
+
+                userGroupList.add(userGroup);
+            }
         });
 
         //Create response body
