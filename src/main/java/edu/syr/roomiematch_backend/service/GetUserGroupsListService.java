@@ -6,6 +6,7 @@ import edu.syr.roomiematch_backend.model.GetUserGroupsResponse;
 import edu.syr.roomiematch_backend.model.UserGroup;
 import edu.syr.roomiematch_backend.repository.UserGroupIndexRepository;
 import edu.syr.roomiematch_backend.repository.UserIndexRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 public class GetUserGroupsListService {
 
     @Autowired
@@ -28,7 +30,7 @@ public class GetUserGroupsListService {
         Iterable<UserGroupIndex> userGroupIndexIterable = userGroupIndexRepository.findAll();
         List<UserGroup> userGroupList = new ArrayList<>();
 
-
+        log.info("xuserID: " + xUserId);
         userGroupIndexIterable.forEach( userGroupIndex -> {
 
             if(!userGroupIndex.getUser_ids().get(0).equalsIgnoreCase(xUserId)) {

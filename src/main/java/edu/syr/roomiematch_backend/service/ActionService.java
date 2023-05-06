@@ -4,6 +4,7 @@ import edu.syr.roomiematch_backend.dao.LikedGroup;
 import edu.syr.roomiematch_backend.dao.UserGroupIndex;
 import edu.syr.roomiematch_backend.dao.UserGroupLink;
 import edu.syr.roomiematch_backend.model.GroupList;
+import edu.syr.roomiematch_backend.model.GroupListGroups;
 import edu.syr.roomiematch_backend.model.LikeResponse;
 import edu.syr.roomiematch_backend.model.LikeResponseGroup;
 import edu.syr.roomiematch_backend.repository.LikedGroupsRepository;
@@ -125,4 +126,36 @@ public class ActionService {
     }
 
 
+    public ResponseEntity<GroupList> getlikes(String xUserId) {
+
+        GroupList groupList = new GroupList();
+        GroupListGroups groupListGroups  = new GroupListGroups();
+
+        List<GroupListGroups> groupListGroupsList = new ArrayList<>();
+
+        UserGroupLink userGroupLink =  userGroupLinkRepository.findByUserId(xUserId);
+
+        List<LikedGroup> likedGroupsList = likedGroupsRepository.findByGroupIdMakingLikeAction(userGroupLink.getGroupId());
+
+        for(LikedGroup likedGroup : likedGroupsList) {
+            UserGroupIndex userGroupIndex = userGroupIndexRepository.findByGroupId(likedGroup.getGroupIdLiked());
+
+            groupListGroups.setGroupId(likedGroup.getGroupIdLiked());
+            groupListGroups.setUserIds(userGroupIndex.getUser_ids());
+
+            List<String> userNames= new ArrayList<>();
+            userGroupIndex.getUsers().forEach(User -> {
+                userNames.add(User.getUserAttributes().getName());
+            });
+
+            groupListGroups.setUserNames(userNames);
+            groupListGroupsList.add(groupListGroups);
+
+        }
+
+        groupList.setGroups(groupListGroupsList);
+
+        return ResponseEntity.ok(groupList);
+
+    }
 }

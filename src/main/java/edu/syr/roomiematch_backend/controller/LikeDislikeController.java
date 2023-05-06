@@ -35,7 +35,7 @@ public class LikeDislikeController implements LikeDislikeApi {
 
     @Override
     public ResponseEntity<GroupList> getLikes(String xUserId) {
-        return null;
+        return actionService.getlikes(xUserId);
     }
 
     @Override
