@@ -13,6 +13,8 @@ import edu.syr.roomiematch_backend.repository.UserGroupLinkRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -102,12 +104,12 @@ public class ActionService {
 
     }
 
-    public ResponseEntity<String> performDislikeAction(String groupId, String xUserId) {
+    public ResponseEntity<Void> performDislikeAction(String groupId, String xUserId) {
 
         UserGroupLink userGroupLink = userGroupLinkRepository.findByUserId(xUserId);
 
         if (userGroupLink == null) {
-            return ResponseEntity.ok("Error when performing dislike!");
+            return new ResponseEntity<Void>(HttpStatus.OK);
         }
         Iterable<LikedGroup> documents = likedGroupsRepository.findAll();
         List<LikedGroup> likedGroupsList = new ArrayList<>();
@@ -118,7 +120,7 @@ public class ActionService {
         }
 
         likedGroupsRepository.deleteAll(likedGroupsList);
-        return ResponseEntity.ok("Done");
+        return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
 

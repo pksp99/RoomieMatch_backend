@@ -33,7 +33,7 @@ public class GroupService {
 
 
     //Add group2 to group1
-    public ResponseEntity<String> makeGroup(String groupId1, String groupId2) {
+    public ResponseEntity<Void> makeGroup(String groupId1, String groupId2) {
 
 
         //Change Groups ID in user Index from GroupId2 to GroupID1
@@ -119,6 +119,6 @@ public class GroupService {
         }
 
 
-        return new ResponseEntity<>("Done", HttpStatus.CREATED);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

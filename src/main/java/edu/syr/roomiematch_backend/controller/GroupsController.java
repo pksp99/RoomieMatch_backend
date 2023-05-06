@@ -28,7 +28,7 @@ public class GroupsController implements GroupsApi {
     }
 
     @Override
-    public ResponseEntity<String> makeGroup(String groupId1, String groupId2) {
+    public ResponseEntity<Void> makeGroup(String groupId1, String groupId2) {
         return groupService.makeGroup(groupId1,groupId2);
     }
 }
