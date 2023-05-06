@@ -18,8 +18,16 @@ public class MakeGroupService {
     @Autowired
     UserGroupLinkRepository userGroupLinkRepository;
     public ResponseEntity<Void> makeGroup(String groupId1, String groupId2) {
+        if (groupId1.equals(groupId2)) {
+            return new ResponseEntity<Void>(HttpStatus.OK);
+        }
         UserGroupIndex userGroupIndex1 = userGroupIndexRepository.findByGroupId(groupId1);
         UserGroupIndex userGroupIndex2 = userGroupIndexRepository.findByGroupId(groupId2);
+
+        if (userGroupIndex1 == null || userGroupIndex2 == null) {
+            return new ResponseEntity<Void>(HttpStatus.OK);
+        }
+
         userGroupIndex1.getUser_ids().addAll(userGroupIndex2.getUser_ids());
         userGroupIndex1.getUsers().addAll(userGroupIndex2.getUsers());
         userGroupIndex1.setUser_count(userGroupIndex1.getUser_count() + userGroupIndex2.getUser_count());

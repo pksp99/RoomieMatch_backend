@@ -344,6 +344,32 @@ paths:
         201:
           description: done
 
+  /myGroup:
+    get:
+      tags:
+        - Groups
+      summary: Get users Group Endpoint
+      description: Join two grounps
+      security:
+        - APIKeyAuth: [ ]
+      operationId: getUserGroup
+      parameters:
+        - in: header
+          name: x-userId
+          description: User ID of the authenticated user
+          schema:
+            type: string
+            example: USXXXXXXXXXXXXXXXXX
+          required: true
+
+      responses:
+        200:
+          description: List of Group Ids dismissed by the user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserGroup"
+
 
   /healthcheck:
     get:
