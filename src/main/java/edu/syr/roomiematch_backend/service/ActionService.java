@@ -11,16 +11,12 @@ import edu.syr.roomiematch_backend.repository.LikedGroupsRepository;
 import edu.syr.roomiematch_backend.repository.UserGroupIndexRepository;
 import edu.syr.roomiematch_backend.repository.UserGroupLinkRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -133,7 +129,8 @@ public class ActionService {
 
         List<GroupListGroups> groupListGroupsList = new ArrayList<>();
 
-        UserGroupLink userGroupLink =  userGroupLinkRepository.findByUserId(xUserId);
+
+        UserGroupLink userGroupLink = userGroupLinkRepository.findByUserId(xUserId);
 
         List<LikedGroup> likedGroupsList = likedGroupsRepository.findByGroupIdMakingLikeAction(userGroupLink.getGroupId());
 

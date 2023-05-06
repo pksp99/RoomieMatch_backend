@@ -7,4 +7,6 @@ public interface UserGroupLinkRepository extends ElasticsearchRepository<UserGro
 
     UserGroupLink findByUserId(String userId);
 
+    UserGroupLink findByGroupId(String groupId);
+
 }

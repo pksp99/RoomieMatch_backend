@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 public interface UserIndexRepository extends ElasticsearchRepository<UserIndex,String> {
     UserIndex findByUserId(String userId);
 
+    UserIndex findByGroupId(String groupId);
+
 }
