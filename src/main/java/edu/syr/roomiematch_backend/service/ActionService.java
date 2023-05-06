@@ -129,7 +129,7 @@ public class ActionService {
     public ResponseEntity<GroupList> getlikes(String xUserId) {
 
         GroupList groupList = new GroupList();
-        GroupListGroups groupListGroups  = new GroupListGroups();
+
 
         List<GroupListGroups> groupListGroupsList = new ArrayList<>();
 
@@ -139,11 +139,12 @@ public class ActionService {
 
         for(LikedGroup likedGroup : likedGroupsList) {
             UserGroupIndex userGroupIndex = userGroupIndexRepository.findByGroupId(likedGroup.getGroupIdLiked());
-
-            groupListGroups.setGroupId(likedGroup.getGroupIdLiked());
+            GroupListGroups groupListGroups = new GroupListGroups();
+            groupListGroups.setGroupId(userGroupIndex.getGroupId());
             groupListGroups.setUserIds(userGroupIndex.getUser_ids());
 
             List<String> userNames= new ArrayList<>();
+
             userGroupIndex.getUsers().forEach(User -> {
                 userNames.add(User.getUserAttributes().getName());
             });
