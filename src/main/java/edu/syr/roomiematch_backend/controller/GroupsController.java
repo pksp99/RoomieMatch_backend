@@ -2,6 +2,8 @@ package edu.syr.roomiematch_backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.syr.roomiematch_backend.api.GroupsApi;
+import edu.syr.roomiematch_backend.service.MakeGroupService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -10,6 +12,8 @@ import java.util.Optional;
 
 @RestController
 public class GroupsController implements GroupsApi {
+    @Autowired
+    private MakeGroupService makeGroupService;
     @Override
     public Optional<ObjectMapper> getObjectMapper() {
         return Optional.empty();
@@ -22,6 +26,7 @@ public class GroupsController implements GroupsApi {
 
     @Override
     public ResponseEntity<Void> makeGroup(String groupId1, String groupId2) {
-        return null;
+
+        return makeGroupService.makeGroup(groupId1, groupId2);
     }
 }

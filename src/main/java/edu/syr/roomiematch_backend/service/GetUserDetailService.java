@@ -1,8 +1,10 @@
 package edu.syr.roomiematch_backend.service;
 
-import edu.syr.roomiematch_backend.dao.UserIndex;
+import edu.syr.roomiematch_backend.dao.UserGroupIndex;
+import edu.syr.roomiematch_backend.dao.UserGroupLink;
 import edu.syr.roomiematch_backend.model.User;
-import edu.syr.roomiematch_backend.repository.UserIndexRepository;
+import edu.syr.roomiematch_backend.repository.UserGroupIndexRepository;
+import edu.syr.roomiematch_backend.repository.UserGroupLinkRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -12,22 +14,24 @@ public class GetUserDetailService {
 
 
     @Autowired
-    private UserIndexRepository userIndexRepository;
+    UserGroupIndexRepository userGroupIndexRepository;
+
+    @Autowired
+    UserGroupLinkRepository userGroupLinkRepository;
 
     public ResponseEntity<User> getUserDetail(String userId, String xUserId) {
-        UserIndex userIndex = userIndexRepository.findByUserId(userId);
-        User user = new User();
 
-        if(userIndex!=null) {
-
-            user.setUserId(userIndex.getUserId());
-            user.setEmail(userIndex.getEmail());
-            user.setGroupId(userIndex.getGroupId());
-            user.setUserAttributes(userIndex.getUserAttributes());
-            user.setPreferredAttributes(userIndex.getPreferredAttributes());
+        UserGroupLink userGroupLink = userGroupLinkRepository.findByUserId(userId);
+        if(userGroupLink == null) {
+            return ResponseEntity.ok().body(null);
         }
+        UserGroupIndex userGroupIndex = userGroupIndexRepository.findByGroupId(userGroupLink.getGroupId());
 
-
-        return ResponseEntity.ok().body(user);
+        return ResponseEntity.ok().body(
+                userGroupIndex
+                .getUsers()
+                        .stream()
+                        .filter(user -> user.getUserId().equals(userId)).findAny()
+                        .orElse(null));
     }
 }
