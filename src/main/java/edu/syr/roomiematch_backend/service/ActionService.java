@@ -11,26 +11,18 @@ import edu.syr.roomiematch_backend.repository.LikedGroupsRepository;
 import edu.syr.roomiematch_backend.repository.UserGroupIndexRepository;
 import edu.syr.roomiematch_backend.repository.UserGroupLinkRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @Slf4j
 public class ActionService {
 
-    @Autowired
-    RestHighLevelClient restHighLevelClient;
 
     @Autowired
     UserGroupLinkRepository userGroupLinkRepository;
@@ -69,12 +61,17 @@ public class ActionService {
                     likeResponse.setMutualLike(true);
                     List<String> user_names = new ArrayList<>();
                     List<String> user_ids = new ArrayList<>();
+                    List<String> group_ids = new ArrayList<>();
 
-                    likeResponseGroup.setGroupId(userGroupLink.getGroupId());
+
 
                     //Get user details from both groups and add it in response body
                     UserGroupIndex userGroupIndex = userGroupIndexRepository.findByGroupId(groupId);
                     UserGroupIndex userGroupIndex2 = userGroupIndexRepository.findByGroupId(userGroupLink.getGroupId());
+
+                    group_ids.add(userGroupIndex.getGroupId());
+                    group_ids.add(userGroupIndex2.getGroupId());
+                    likeResponseGroup.setGroupIds(group_ids);
 
                     user_ids.addAll(userGroupIndex.getUser_ids());
                     user_ids.addAll(userGroupIndex2.getUser_ids());

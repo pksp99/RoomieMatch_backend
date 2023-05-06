@@ -1,10 +1,9 @@
 package edu.syr.roomiematch_backend.repository;
 
 import edu.syr.roomiematch_backend.dao.UserGroupIndex;
-import org.springframework.data.elasticsearch.annotations.Query;
-import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
-public interface UserGroupIndexRepository extends ElasticsearchRepository<UserGroupIndex,String> {
+public interface UserGroupIndexRepository extends MongoRepository<UserGroupIndex,String> {
 
     UserGroupIndex findByGroupId(String groupId);
 

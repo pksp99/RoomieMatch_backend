@@ -33,7 +33,7 @@ public class CreateUserService {
         if (userGroupLink == null) {
             userGroupLink = new UserGroupLink();
             userGroupLink.setUserId(xUserId);
-            userGroupLink.setGroupId(body.getUserId());
+            userGroupLink.setGroupId(body.getGroupId());
             userGroupLinkRepository.save(userGroupLink);
             userGroupIndex.setGroup_info("Some Group");
             userGroupIndex.setUser_count(1);

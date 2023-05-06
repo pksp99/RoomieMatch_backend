@@ -407,14 +407,16 @@ components:
           type: object
           description: If it is a mutual like, this property is expected.
           required:
-            - groupId
+            - group_ids
             - user_ids
             - user_names
           properties:
-            groupId:
-              type: string
-              example: GRXXXXXXXXXXXXXXXXXXX
-              description: Unique group ID.
+            group_ids:
+              type: array
+              items:
+                type: string
+                example: GRXXXXXXXXXXXXXXXXXXX
+                description: Unique group ID.
             user_ids:
               type: array
               items:
@@ -562,7 +564,6 @@ components:
           enum: [ "Business Administration",  "Computer Science",  "Psychology",  "Nursing",  "Education",  "Biology",  "Engineering",  "Communications",  "Political Science",  "English Literature",  "Mathematics",  "History",  "Economics",  "Sociology",  "Art and Design",  "Environmental Science/Studies",  "Marketing",  "Physics",  "Chemistry",  "Foreign Languages and Literatures" ]
         date_available:
           type: string
-          format: date
           description: Date of availability
         food_preference:
           type: string
