@@ -137,6 +137,9 @@ public class ActionService {
 
         for(LikedGroup likedGroup : likedGroupsList) {
             UserGroupIndex userGroupIndex = userGroupIndexRepository.findByGroupId(likedGroup.getGroupIdLiked());
+            if(userGroupIndex == null) {
+                continue;
+            }
             GroupListGroups groupListGroups = new GroupListGroups();
             groupListGroups.setGroupId(userGroupIndex.getGroupId());
             groupListGroups.setUserIds(userGroupIndex.getUser_ids());
