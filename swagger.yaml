@@ -176,12 +176,16 @@ paths:
             example: USXXXXXXXXXXXXXXXXX
           required: true
       tags:
-        - LikeDislike
+        - Like/Dislike
       responses:
-        201:
-          description: done
+        200:
+          description: Like Object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LikeResponse"
 
-  /disLike/{groupId}:
+  /dislike/{groupId}:
     parameters:
       - name: groupId
         in: path
@@ -203,10 +207,169 @@ paths:
             example: USXXXXXXXXXXXXXXXXX
           required: true
       tags:
-        - LikeDislike
+        - Like/Dislike
       responses:
         201:
           description: done
+
+  /like:
+    get:
+      security:
+        - APIKeyAuth: [ ]
+      operationId: getLikes
+      parameters:
+        - in: header
+          name: x-userId
+          description: User ID of the authenticated user
+          schema:
+            type: string
+            example: USXXXXXXXXXXXXXXXXX
+          required: true
+      tags:
+        - Like/Dislike
+      responses:
+        200:
+          description: List of Group Ids liked by the user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupList"
+
+  /undismiss/{groupId}:
+    parameters:
+      - name: groupId
+        in: path
+        description: group ID of the user that is undismissed.
+        required: true
+        schema:
+          type: string
+          example: GRXXXXXXXXXXXXXXXXX
+    post:
+      security:
+        - APIKeyAuth: [ ]
+
+      operationId: undismissGroup
+      parameters:
+        - in: header
+          name: x-userId
+          description: User ID of the authenticated user
+          schema:
+            type: string
+            example: USXXXXXXXXXXXXXXXXX
+          required: true
+      tags:
+        - Dismiss/Undismiss
+      responses:
+        201:
+          description: done
+
+  /dismiss/{groupId}:
+    parameters:
+      - name: groupId
+        in: path
+        description: group ID of the user that is dismissed.
+        required: true
+        schema:
+          type: string
+          example: GRXXXXXXXXXXXXXXXXX
+    post:
+      security:
+        - APIKeyAuth: [ ]
+      operationId: dismissGroup
+      parameters:
+        - in: header
+          name: x-userId
+          description: User ID of the authenticated user
+          schema:
+            type: string
+            example: USXXXXXXXXXXXXXXXXX
+          required: true
+      tags:
+        - Dismiss/Undismiss
+      responses:
+        201:
+          description: done
+
+  /dismiss:
+    get:
+      security:
+        - APIKeyAuth: [ ]
+      operationId: getDismisses
+      parameters:
+        - in: header
+          name: x-userId
+          description: User ID of the authenticated user
+          schema:
+            type: string
+            example: USXXXXXXXXXXXXXXXXX
+          required: true
+      tags:
+        - Dismiss/Undismiss
+      responses:
+        200:
+          description: List of Group Ids dismissed by the user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupList"
+
+
+  /makegroup:
+    post:
+      tags:
+        - Groups
+      summary: Make Group Endpoint
+      description: Join two grounps
+      security:
+        - APIKeyAuth: [ ]
+      operationId: makeGroup
+      parameters:
+        - in: query
+          name: group_id_1
+          description: User ID of the authenticated user
+          schema:
+            type: string
+            example: USXXXXXXXXXXXXXXXXX
+          required: true
+
+        - in: query
+          name: group_id_2
+          description: User ID of the authenticated user
+          schema:
+            type: string
+            example: USXXXXXXXXXXXXXXXXX
+          required: true
+
+      responses:
+        201:
+          description: done
+
+  /myGroup:
+    get:
+      tags:
+        - Groups
+      summary: Get users Group Endpoint
+      description: Join two grounps
+      security:
+        - APIKeyAuth: [ ]
+      operationId: getUserGroup
+      parameters:
+        - in: header
+          name: x-userId
+          description: User ID of the authenticated user
+          schema:
+            type: string
+            example: USXXXXXXXXXXXXXXXXX
+          required: true
+
+      responses:
+        200:
+          description: List of Group Ids dismissed by the user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserGroup"
+
 
   /healthcheck:
     get:
@@ -229,6 +392,68 @@ components:
         healthcheck:
           type: string
           enum: [ success, fail ]
+
+    GroupList:
+      type: object
+      required:
+        - groups
+      properties:
+        groups:
+          type: array
+          items:
+            type: object
+            description: Group Info.
+            required:
+              - groupId
+              - user_ids
+              - user_names
+            properties:
+              groupId:
+                type: string
+                example: GRXXXXXXXXXXXXXXXXXXX
+                description: Unique group ID.
+              user_ids:
+                type: array
+                items:
+                  type: string
+              user_names:
+                type: array
+                items:
+                  type: string
+
+
+    LikeResponse:
+      type: object
+      required:
+        - mutual_like
+      properties:
+        mutual_like:
+          type: boolean
+        group:
+          type: object
+          description: If it is a mutual like, this property is expected.
+          required:
+            - group_ids
+            - user_ids
+            - user_names
+          properties:
+            group_ids:
+              type: array
+              items:
+                type: string
+                example: GRXXXXXXXXXXXXXXXXXXX
+                description: Unique group ID.
+            user_ids:
+              type: array
+              items:
+                type: string
+            user_names:
+              type: array
+              items:
+                type: string
+
+
+
     GetUserGroupsResponse:
       type: object
       required:
@@ -365,7 +590,6 @@ components:
           enum: [ "Business Administration",  "Computer Science",  "Psychology",  "Nursing",  "Education",  "Biology",  "Engineering",  "Communications",  "Political Science",  "English Literature",  "Mathematics",  "History",  "Economics",  "Sociology",  "Art and Design",  "Environmental Science/Studies",  "Marketing",  "Physics",  "Chemistry",  "Foreign Languages and Literatures" ]
         date_available:
           type: string
-          format: date
           description: Date of availability
         food_preference:
           type: string
